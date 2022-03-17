@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(mlkit_sample_01 LANGUAGES CXX)
+project(mlkit_sample_face_detection_01 LANGUAGES CXX)
 
-set(BINARY_NAME "mlkit_sample_01")
+set(BINARY_NAME "mlkit_sample_face_detection_01")
 
 cmake_policy(SET CMP0063 NEW)
 

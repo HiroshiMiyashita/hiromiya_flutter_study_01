@@ -58,7 +58,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "jp.gr.java_conf.hiro_titan_d.mlkit_sample_01"
+        applicationId "jp.gr.java_conf.hiro_titan_d.mlkit_sample_face_detection_01"
         //minSdkVersion flutter.minSdkVersion
         minSdkVersion 21
         //targetSdkVersion flutter.targetSdkVersion

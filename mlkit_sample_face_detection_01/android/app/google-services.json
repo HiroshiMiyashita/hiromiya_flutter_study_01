@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:233281592408:android:66c17669ec213c7cbf3e2d",
         "android_client_info": {
-          "package_name": "jp.gr.java_conf.hiro_titan_d.mlkit_sample_01"
+          "package_name": "jp.gr.java_conf.hiro_titan_d.mlkit_sample_face_detection_01"
         }
       },
       "oauth_client": [

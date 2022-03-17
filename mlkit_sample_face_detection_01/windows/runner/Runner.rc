@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "jp.gr.java_conf.hiro_titan_d" "\0"
-            VALUE "FileDescription", "mlkit_sample_01" "\0"
+            VALUE "FileDescription", "mlkit_sample_face_detection_01" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mlkit_sample_01" "\0"
+            VALUE "InternalName", "mlkit_sample_face_detection_01" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 jp.gr.java_conf.hiro_titan_d. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mlkit_sample_01.exe" "\0"
-            VALUE "ProductName", "mlkit_sample_01" "\0"
+            VALUE "OriginalFilename", "mlkit_sample_face_detection_01.exe" "\0"
+            VALUE "ProductName", "mlkit_sample_face_detection_01" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

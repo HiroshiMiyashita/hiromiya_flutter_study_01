@@ -1,4 +1,4 @@
-# mlkit_sample_01
+# mlkit_sample_face_detection_01
 
 A new Flutter project.
 

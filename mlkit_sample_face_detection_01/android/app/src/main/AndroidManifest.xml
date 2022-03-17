@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="jp.gr.java_conf.hiro_titan_d.mlkit_sample_01">
+    package="jp.gr.java_conf.hiro_titan_d.mlkit_sample_face_detection_01">
    <application
         android:label="@string/app_name"
         android:name="${applicationName}"

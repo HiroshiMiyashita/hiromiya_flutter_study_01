@@ -1,6 +1,6 @@
 {
-    "name": "mlkit_sample_01",
-    "short_name": "mlkit_sample_01",
+    "name": "mlkit_sample_face_detection_01",
+    "short_name": "mlkit_sample_face_detection_01",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

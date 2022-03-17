@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: build apk for mlkit_sample_01
+name: build apk for mlkit_sample_face_detection_01
 
 # Controls when the workflow will run
 on:
@@ -39,20 +39,20 @@ jobs:
           
       - name: keystoreをbase64でエンコードされたsecretsからデーコードしてファイルに吐き出す
         run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > release.jks
-        working-directory: ./mlkit_sample_01/android/app
+        working-directory: ./mlkit_sample_face_detection_01/android/app
         
       - name: keystore.propertiesをsecretsからファイルに吐き出す
         run: echo "${{ secrets.KEYSTORE_PROPERTIES }}" > keystore.properties
-        working-directory: ./mlkit_sample_01/android/app
+        working-directory: ./mlkit_sample_face_detection_01/android/app
 
       - name: android用にビルド
         run: |
           flutter pub get
           flutter build apk
-        working-directory: ./mlkit_sample_01/
+        working-directory: ./mlkit_sample_face_detection_01/
 
       - name: GitHub Pagesにデプロイ
         uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
           branch: gh-pages
-          folder: mlkit_sample_01/build/app/outputs/
+          folder: mlkit_sample_face_detection_01/build/app/outputs/
