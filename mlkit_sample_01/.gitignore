@@ -48,3 +48,5 @@ app.*.map.json
 # Keystore and key properties.
 *.jsk
 keystore.properties
+
+.fvm/flutter_sdk/
