@@ -102,15 +102,21 @@ class _FaceFinderState extends State<FaceFinder> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton(
-            onPressed: () => _setFaceDetectResult(ImageSource.gallery),
-            tooltip: "Select Image.",
-            child: const Icon(Icons.add_photo_alternate),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              onPressed: () => _setFaceDetectResult(ImageSource.gallery),
+              tooltip: "Select Image.",
+              child: const Icon(Icons.add_photo_alternate),
+            ),
           ),
-          FloatingActionButton(
-            onPressed: () => _setFaceDetectResult(ImageSource.camera),
-            tooltip: "Take a Photo.",
-            child: const Icon(Icons.add_a_photo),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              onPressed: () => _setFaceDetectResult(ImageSource.camera),
+              tooltip: "Take a Photo.",
+              child: const Icon(Icons.add_a_photo),
+            ),
           )
         ],
       ),
