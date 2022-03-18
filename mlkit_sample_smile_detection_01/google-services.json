@@ -9,35 +9,6 @@
       "client_info": {
         "mobilesdk_app_id": "1:233281592408:android:66c17669ec213c7cbf3e2d",
         "android_client_info": {
-          "package_name": "jp.gr.java_conf.hiro_titan_d.mlkit_sample_01"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "233281592408-8tltp30g67l6rmakaeoom96aci4cp2un.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyC9LF_khjuN4wY5FEG6iNXLV-_MTAD5Y78"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "233281592408-8tltp30g67l6rmakaeoom96aci4cp2un.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:233281592408:android:d9abed6cb8f5dc38bf3e2d",
-        "android_client_info": {
           "package_name": "jp.gr.java_conf.hiro_titan_d.mlkit_sample_face_detection_01"
         }
       },

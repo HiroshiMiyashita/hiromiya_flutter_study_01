@@ -1,0 +1,10 @@
+flutter create -a kotlin mlkit_sample_smile_detection_01
+
+作成されたプロジェクト内のファイルの
+
+com.example.mlkit_sample_smile_detection_01
+
+という文字列を正しいプロジェクト名に変更する.
+
+例)
+jp.gr.java_conf.xxxxxxxxx.mlkit_sample_smile_detection_01
