@@ -49,4 +49,4 @@ app.*.map.json
 *.jsk
 keystore.properties
 
-.fvm/flutter_sdk/
+.fvm/flutter_sdk
