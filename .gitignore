@@ -20,4 +20,4 @@ doc/api/
 *.js.deps
 *.js.map
 
-.fvm/flutter_sdk/
+.fvm/flutter_sdk
