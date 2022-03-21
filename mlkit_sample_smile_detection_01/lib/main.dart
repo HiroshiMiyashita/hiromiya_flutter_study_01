@@ -51,6 +51,12 @@ class _MainFormState extends State<MainForm> {
   final ImagePicker _picker = ImagePicker();
   final uuid = const Uuid();
 
+  @override
+  void dispose() {
+    _faceDetector.close();
+    super.dispose();
+  }
+
   Future<void> _detectFace(ImageSource imgSrc) async {
     setState(() => _msg = "Processing...");
 
