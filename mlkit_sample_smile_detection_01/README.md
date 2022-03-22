@@ -122,64 +122,62 @@ GoogleのMLKitを使用した笑顔採点のAndrodiアプリケーション.
         def keystorePropertiesFile = rootProject.file("app/keystore.properties")
     android/app/google-services.json
     
-5.  android/app/build.gradleの編集.
+5. ビルドで失敗しないように android/app/build.gradle に以下を追加.
 
-    1. firebaseを使えるようにするために、android/app/build.gradleに以下の1行を追加.
-
-        追加先はファイルの直下に追加.
+    1. 追加先 `android` 直下の設定値として追加.
 
         ```gradle
-        apply plugin: 'com.google.gms.google-services'
+        packagingOptions {
+            exclude 'META-INF/DEPENDENCIES'
+            exclude 'META-INF/LICENSE'
+            exclude 'META-INF/LICENSE.txt'
+            exclude 'META-INF/license.txt'
+            exclude 'META-INF/NOTICE'
+            exclude 'META-INF/NOTICE.txt'
+            exclude 'META-INF/notice.txt'
+            exclude 'META-INF/ASL2.0'
+            exclude("META-INF/*.kotlin_module")
+        }
         ```
         
-    2. firebaseに登録するときに指定したAndroidパッケージ名を設定.
+    2. debugビルドのアプリケーションID(Androidのパッケージ名)に`debug`というサフィックスがつかないように`android/app/build.gradle`を修正.
 
-        追加先は、 `android.defaultConfig`
-
-        ```gradle
-        applicationId 'firebaseに登録するときに指定したAndroidパッケージ名`
-        ```
-
-    3. 
+    修正箇所 `android.buildType`
     
-
-    
-
-    
-   
-6. ビルドで失敗しないように android/app/build.gradle に以下を追加.
-
-    追加先 `android` 直下の設定値として追加.
-
     ```gradle
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/ASL2.0'
-        exclude("META-INF/*.kotlin_module")
+    debug {
+        resValue "string", "app_name", "(d)Smile Detection"
+        // applicationIdSuffix ".debug"
+        versionNameSuffix "-d"
     }
     ```
 
-5. firebaseを使えるようにするために、android/app/build.gradleに以下の1行を追加.
+## ビルド方法
 
-   ```gradle
-   
+### リリース用apkのビルド
 
-2. flutter 2.10.3
-## Getting Started
+1. 以下のコマンドを実行
 
-This project is a starting point for a Flutter application.
+    ```sh
+    flutter build apk --release
+    ```
 
-A few resources to get you started if this is your first Flutter project:
+2. リリースビルドができていることを確認
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+    `build/app/outputs/flutter-sdk/app.apk`
+    
+    この名前は、build.gradleの設定で変わると考えられるが、よくわからない.
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### デバッグ用apkのビルド
+
+1. 以下のコマンドを実行
+
+    ```sh
+    flutter build apk --debug
+    ```
+
+2. リリースビルドができていることを確認
+
+    `build/app/outputs/flutter-sdk/app-debug.apk`
+    
+    この名前は、build.gradleの設定で変わると考えられるが、よくわからない.

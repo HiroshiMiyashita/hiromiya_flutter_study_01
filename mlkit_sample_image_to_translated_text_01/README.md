@@ -1,8 +1,8 @@
-# GoogleのMLKitを使用した顔認識アプリケーション
+# GoogleのMLKitを使用した画像上のテキストを読み取り、それを翻訳したものを表示するアプリ
 
-GoogleのMLKitを使用した顔認識のAndrodiアプリケーション.
+GoogleのMLKitを使用した画像上のテキストの翻訳したものを表示するアプリケーション.
 
-カメラで撮影した写真やギャラリーの写真に対して顔認識を行い、顔の部分を短径で囲むアプリケーション.
+カメラで撮影した写真やギャラリーの写真に対してMLKitのVisionを使用してテキストを抽出し、MLKitのNLPでそのテキストを翻訳してその結果を返す.
 
 ## 開発環境の設定
 
@@ -59,7 +59,34 @@ GoogleのMLKitを使用した顔認識のAndrodiアプリケーション.
             
             上記では`resValue`でアプリ名称も指定している.
             
-3. google_ml_kit(拡張パッケージ)で顔認識、画像ラベリング、バーコードスキャンを使用できるようにするための設定.
+3. firebaseの使用を設定
+
+    1. firebaseに本Androidアプリケーションを登録し、得られたgoogle-services.jsonを以下のファイル名で保存.
+                        
+        firebaseに登録するときのAndroidパッケージ名は、`android/app/src/main/AndroidManifest.xml`で指定しているパッケージ名.
+
+        `AndroidManifest.xml`の例)
+
+        ```xml
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+            package="jp.gr.java_conf.hiro_titan_d.mlkit_sample_smile_detection_01">
+        ```
+        
+        ここでは、パッケージ名は `jp.gr.java_conf.hiro_titan_d.mlkit_sample_smile_detection_01` 
+        
+    2. firebaseにアプリケーションを登録するときに指示に従いファイルを更新.
+    
+    3. 念のため、multiDex対応するように設定
+
+        設定ファイル `android/app/build.gradle`
+
+        設定箇所は `android.defaultConfig`
+
+        ```gradle
+        multiDexEnabled true
+        ```
+
+4. google_ml_kit(拡張パッケージ)で顔認識、画像ラベリング、バーコードスキャンを使用できるようにするための設定.
 
     1. google_ml_kitが対応しているバージョンのAndroidにターゲットを変更.
 
@@ -119,6 +146,7 @@ GoogleのMLKitを使用した顔認識のAndrodiアプリケーション.
             versionNameSuffix "-d"
         }
         ```
+
 ## ビルド方法
 
 ### リリース用apkのビルド
