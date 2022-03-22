@@ -1,115 +1,304 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:io';
 
-void main() {
+import 'package:uuid/uuid.dart';
+import 'package:path/path.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+final langConfThreshold = 0.7;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: "Translator",
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const Home(TranslateLanguage.ENGLISH, TranslateLanguage.JAPANESE),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class Home extends StatefulWidget {
+  final String srcLang;
+  final String destLang;
+  const Home(this.srcLang, this.destLang, {Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _HomeState createState() => _HomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeState extends State<Home> {
+  bool _initialized = false;
+  String _msg = "";
+  String _srcLang = "";
+  String _destLang = "";
+  File? _imgFile;
+  RecognisedText? _textRecRes;
+  List<String?>? _tranTexts;
 
-  void _incrementCounter() {
+  final TextDetectorV2 _textDetector = GoogleMlKit.vision.textDetectorV2();
+  final tranLangModelMgr = GoogleMlKit.nlp.translateLanguageModelManager();
+  final LanguageIdentifier _langIdentfier =
+      GoogleMlKit.nlp.languageIdentifier();
+  OnDeviceTranslator? _translator;
+  final ImagePicker _picker = ImagePicker();
+  final uuid = const Uuid();
+
+  OnDeviceTranslator? get tranlator => _translator;
+
+  @override
+  void initState() {
+    super.initState();
+    _srcLang = widget.srcLang;
+    _destLang = widget.destLang;
+    _translator = GoogleMlKit.nlp.onDeviceTranslator(
+        sourceLanguage: _srcLang, targetLanguage: _destLang);
+
+    Future<bool>(() async {
+      await tranLangModelMgr.downloadModel(widget.srcLang);
+      await tranLangModelMgr.downloadModel(widget.destLang);
+      return (await tranLangModelMgr.isModelDownloaded(widget.srcLang)) &&
+          (await tranLangModelMgr.isModelDownloaded(widget.destLang));
+    }).then((res) {
+      _initialized = res;
+      if (!res) {
+        setState(() {
+          _msg = "Fail to download language model";
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _textDetector.close();
+    _langIdentfier.close();
+    _translator?.close();
+    super.dispose();
+  }
+
+  Future<void> _translate(XFile? imgXFile) async {
+    if (imgXFile == null) {
+      setState(() => _msg = "No Image Picked.");
+      return;
+    }
+    final imgFile = File(imgXFile.path);
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _msg = "Processing...";
+      _imgFile = imgFile;
+    });
+
+    final inpImg = InputImage.fromFile(imgFile);
+    final textRecRes = await _textDetector.processImage(inpImg);
+
+    final tran = tranlator;
+    if (tran == null) {
+      setState(() {
+        _msg = "No translator setted.";
+      });
+      return;
+    }
+    final tranTexts = textRecRes.blocks.isNotEmpty
+        ? await Future.wait(
+            textRecRes.blocks.map(
+              (block) async {
+                final possibleLangs = (await _langIdentfier
+                    .identifyPossibleLanguages(block.text));
+                final isSrcLang = possibleLangs.any((e) =>
+                    e.language == widget.srcLang &&
+                    e.confidence > langConfThreshold);
+                return isSrcLang
+                    ? (await tran.translateText(block.text))
+                    : null;
+              },
+            ),
+          )
+        : <String>[];
+
+    setState(() {
+      _msg = "";
+      _textRecRes = textRecRes;
+      _tranTexts = tranTexts;
+    });
+
+    final imgRef = FirebaseStorage.instance
+        .ref()
+        .child("/images/${uuid.v1()}_${basename(imgFile.path)}");
+    final taskState =
+        (await imgRef.putFile(imgFile).whenComplete(() => null)).state;
+    if (taskState != TaskState.success) {
+      setState(() => _msg = "Failed to upload the image file.");
+      return;
+    }
+
+    final imgDLUrl = await imgRef.getDownloadURL();
+    await FirebaseFirestore.instance.collection("translated_results").add({
+      "date": FieldValue.serverTimestamp(),
+      "image_url": imgDLUrl,
+      "src_lang_setting": _srcLang,
+      "dest_lang_setting": _destLang,
+      "blocks": textRecRes.blocks.map((block) {
+        final rect = block.rect;
+        print(block.recognizedLanguages);
+        return {
+          "recognized_languages": block.recognizedLanguages,
+          "src_text": block.text,
+          "position": {
+            "top": rect.top,
+            "left": rect.left,
+            "bottom": rect.bottom,
+            "right": rect.right
+          }
+        };
+      }).toList(),
+      "translated_texts": tranTexts
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final imgFile = _imgFile;
+    final textRecRes = _textRecRes;
+    final tranTexts = _tranTexts ?? [];
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("Translator $_srcLang -> $_destLang"),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: !_initialized
+          ? Center(child: Text(_msg))
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  child: imgFile != null
+                      ? InteractiveViewer(
+                          child: Image.file(imgFile),
+                          scaleEnabled: true,
+                          panEnabled: true,
+                        )
+                      : const Center(
+                          child: Text(
+                            "No Image Selected.",
+                          ),
+                        ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: textRecRes != null && tranTexts.isNotEmpty
+                      ? ListView.separated(
+                          itemBuilder: (ctx, i) {
+                            final block = textRecRes.blocks[i];
+                            final tranText = tranTexts[i];
+                            return TranslateResultTile(
+                                block, tranText, "Block $i");
+                          },
+                          separatorBuilder: (ctx, i) => const Divider(),
+                          itemCount: tranTexts.length,
+                        )
+                      : const Center(
+                          child: Text("No Dtected texts."),
+                        ),
+                ),
+                Text(_msg,
+                    style: const TextStyle(
+                      color: Colors.lightBlue,
+                      fontSize: 32.0,
+                    )),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+      floatingActionButton: !_initialized
+          ? const SizedBox.shrink()
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                FloatingActionButton(
+                  onPressed: () async {
+                    try {
+                      await _translate(
+                          await _picker.pickImage(source: ImageSource.gallery));
+                    } catch (e) {
+                      setState(
+                          () => _msg = "Error on processing image.(error=$e)");
+                    }
+                  },
+                  tooltip: "Select Image",
+                  heroTag: "gallery",
+                  child: const Icon(Icons.add_photo_alternate),
+                ),
+                const Padding(padding: EdgeInsets.all(10.0)),
+                FloatingActionButton(
+                  onPressed: () async {
+                    try {
+                      await _translate(await _picker.pickImage(
+                          source: ImageSource.camera, imageQuality: 100));
+                    } catch (e) {
+                      setState(
+                          () => _msg = "Error on processing image.(error=$e)");
+                    }
+                  },
+                  tooltip: "Take Photo",
+                  heroTag: "camera",
+                  child: const Icon(Icons.add_a_photo),
+                ),
+              ],
             ),
-          ],
-        ),
+    );
+  }
+}
+
+class TranslateResultTile extends StatelessWidget {
+  final TextBlock block;
+  final String? tranText;
+  final String title;
+  const TranslateResultTile(this.block, this.tranText, this.title, {Key? key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          const Padding(padding: EdgeInsets.only(bottom: 10)),
+          Text(
+            "Detected Text",
+            style: Theme.of(context).textTheme.caption,
+          ),
+          Card(child: Text(block.text.replaceAll('\n', ' '))),
+          const Padding(padding: EdgeInsets.only(bottom: 10)),
+          Text(
+            "Translated Result",
+            style: Theme.of(context).textTheme.caption,
+          ),
+          Card(child: Text(tranText?.replaceAll('\n', ' ') ?? "")),
+          Image.asset("assets/images/color-regular.png")
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

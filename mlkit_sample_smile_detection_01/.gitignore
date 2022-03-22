@@ -50,4 +50,4 @@ app.*.map.json
 keystore.properties
 
 .fvm/flutter_sdk
-generated_*
+**/generated_*
