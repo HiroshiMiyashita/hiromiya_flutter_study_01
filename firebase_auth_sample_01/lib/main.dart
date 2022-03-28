@@ -142,27 +142,11 @@ class _CustomEmailSignInFormState extends State<CustomEmailSignInForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset('assets/images/sample.png'),
+                const Padding(padding: EdgeInsets.all(20)),
                 const EmailForm(action: AuthAction.signIn),
               ],
             ),
           );
-          // return Column(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     TextField(
-          //       controller: emailCtrl,
-          //     ),
-          //     TextField(
-          //       controller: passwordCtrl,
-          //     ),
-          //     ElevatedButton(
-          //       onPressed: () {
-          //         ctrl.setEmailAndPassword(emailCtrl.text, passwordCtrl.text);
-          //       },
-          //       child: const Text("Sign in"),
-          //     ),
-          //   ],
-          // );
         } else if (state is SigningIn) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is AuthFailed) {
