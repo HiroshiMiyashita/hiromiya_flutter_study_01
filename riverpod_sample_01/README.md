@@ -2,6 +2,34 @@
 
 riverpodという状態管理パッケージのサンプルコード.
 
+ここでは、以下のProviderの基本的なつい方についてサンプルを作成している.
+
+- StateChangeNotifierProvider
+
+  StateChangeNotifierProviderの基本的な使い方及び、StateChangeNotifierProviderを組み合わせて新しいStateChngeNotifierProviderを作って利用する方法.
+  
+  > selectの追加方については現時点ではサンプルとして追加していない.
+  >
+  > selectのつい買い方については以下を参照.
+  >
+  > [selectを使って更新の条件を限定する](https://riverpod.dev/ja/docs/concepts/reading#select%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E6%9B%B4%E6%96%B0%E3%81%AE%E6%9D%A1%E4%BB%B6%E3%82%92%E9%99%90%E5%AE%9A%E3%81%99%E3%82%8B)
+
+- StreamProvider
+
+  基本的なStreamProviderの使い方.
+
+- FutureProvider
+
+  基本的なFutureProviderの使い方.
+
+> 参考
+> 
+> [Riverpodプロジェクトページ](https://pub.dev/packages/riverpod)
+> 
+> [RiverpodのAPIドキュメント](https://pub.dev/documentation/riverpod/latest/riverpod/riverpod-library.html)
+> 
+> [Riverpod公式解説ページ](https://riverpod.dev/ja/)
+
 ## 開発環境の設定
 
 1. fultter 2.10.3 をインストール.
@@ -85,38 +113,7 @@ riverpodという状態管理パッケージのサンプルコード.
         ```
     4. firebaseでメールアドレスとパスワードによる認証を有効化し、ユーザを登録(ユーザのメールアドレスとパスワードを設定).
 
-4. google_ml_kit(拡張パッケージ)で顔認識、画像ラベリング、バーコードスキャンを使用できるようにするための設定.
-
-    1. google_ml_kitが対応しているバージョンのAndroidにターゲットを変更.
-
-        `android/app/build.gradle`を以下のように変更.
-        
-        設定箇所は `android.defaultConfig`
-
-        ```gradle
-        minSdkVersion 21
-        targetSdkVersion 32
-        ```
-        
-        このバージョンは、AndroidのSDKバージョンを示しており、今後のgoogle_ml_kitのバージョンによって変わる可能性がある.
-
-    2. `android/app/src/main/AndroidManifest.xml`に以下追加.
-    
-        設定箇所は `<manifest><application>` 直下.
-
-        ```xml
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="ica,face,ocr" />
-        ```
-
-        | 名前 | 機能 |
-        |:---|:---|
-        | ica | Image Labeling |
-        | ocr | Barcode Scanning |
-        | face | Face Detection |
-
-5. ビルドで失敗しないように android/app/build.gradle に以下を追加.
+4. ビルドで失敗しないように android/app/build.gradle に以下を追加.
 
     1. 追加先 `android` 直下の設定値として追加.
 
@@ -144,7 +141,11 @@ riverpodという状態管理パッケージのサンプルコード.
             // applicationIdSuffix ".debug"
             versionNameSuffix "-d"
         }
-        ```
+```
+5. firebaseのfirestoreの `dogs` コレクションにドキュメントを追加する.
+
+    今回のサンプルでは、`dogs`コレクションに含まれるドキュメントを参照しているので.
+
 
 ## ビルド方法
 
